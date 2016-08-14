@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="description" content="generikus cica">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Generic Cat</title>
+</head>
+<body>
+
+  <canvas id="myCanvasOrigin" height="200" width="200" style="border:1px solid #ccc;"></canvas>
+  <canvas id="myCanvasResult" height="200" width="200" style="border:1px solid #ccc;"></canvas>
+  <canvas id="myCanvasTest" height="200" width="200" style="border:1px solid #ccc;"></canvas>
+  <br/>
+  <canvas id="myCanvas01" height="200" width="200" style="border:1px solid #ccc;"></canvas>
+  <canvas id="myCanvas02" height="200" width="200" style="border:1px solid #ccc;"></canvas>
+  <canvas id="myCanvas03" height="200" width="200" style="border:1px solid #ccc;"></canvas>
+  <canvas id="myCanvas04" height="200" width="200" style="border:1px solid #ccc;"></canvas>
+  <canvas id="myCanvas05" height="200" width="200" style="border:1px solid #ccc;"></canvas>
+  <canvas id="myCanvas06" height="200" width="200" style="border:1px solid #ccc;"></canvas>
+  <canvas id="myCanvas07" height="200" width="200" style="border:1px solid #ccc;"></canvas>
+  <canvas id="myCanvas08" height="200" width="200" style="border:1px solid #ccc;"></canvas>
+  <canvas id="myCanvas09" height="200" width="200" style="border:1px solid #ccc;"></canvas>
+  
+
+<script>
+
+var width = 200;
+var height = 200;
+var maxIteration = 100;
+// var imgSrc = 'fullcircle.png';
+// var imgSrc = 'circle.png';
+var imgSrc = 'cat.png';
+
+cOrigin=document.getElementById("myCanvasOrigin").getContext("2d");
+cResult=document.getElementById("myCanvasResult").getContext("2d");
+cTest=document.getElementById("myCanvasTest").getContext("2d");
+
+c = new Array();
+c[01]=document.getElementById("myCanvas01").getContext("2d");
+c[02]=document.getElementById("myCanvas02").getContext("2d");
+c[03]=document.getElementById("myCanvas03").getContext("2d");
+c[04]=document.getElementById("myCanvas04").getContext("2d");
+c[05]=document.getElementById("myCanvas05").getContext("2d");
+c[06]=document.getElementById("myCanvas06").getContext("2d");
+c[07]=document.getElementById("myCanvas07").getContext("2d");
+c[08]=document.getElementById("myCanvas08").getContext("2d");
+c[09]=document.getElementById("myCanvas09").getContext("2d");
+
+
+var img = new Image();
+img.src = imgSrc + '?' + new Date().getTime();
+//img.setAttribute('crossOrigin', '');
+img.onload = function () { 
+  cOrigin.drawImage(img, 0, 0); 
+  iterateStuff();
+};
+
+function iterateStuff(){
+  c[01].globalAlpha=0.1;
+  c[02].globalAlpha=0.1;
+  c[03].globalAlpha=0.1;
+  c[04].globalAlpha=0.1;
+  c[05].globalAlpha=0.1;
+  c[06].globalAlpha=0.1;
+  c[07].globalAlpha=0.1;
+  c[08].globalAlpha=0.1;
+  c[09].globalAlpha=0.1;
+
+  c[01].strokeStyle = '#333333';
+  c[02].strokeStyle = '#333333';
+  c[03].strokeStyle = '#333333';
+  c[04].strokeStyle = '#333333';
+  c[05].strokeStyle = '#333333';
+  c[06].strokeStyle = '#333333';
+  c[07].strokeStyle = '#333333';
+  c[08].strokeStyle = '#333333';
+  c[09].strokeStyle = '#333333';
+
+  var p = 0;
+  while (p < maxIteration){
+
+    var destinationImageData = cResult.getImageData(0, 0, width, height); 
+    c[01].putImageData(destinationImageData, 0, 0); 
+    c[02].putImageData(destinationImageData, 0, 0); 
+    c[03].putImageData(destinationImageData, 0, 0); 
+    c[04].putImageData(destinationImageData, 0, 0); 
+    c[05].putImageData(destinationImageData, 0, 0); 
+    c[06].putImageData(destinationImageData, 0, 0); 
+    c[07].putImageData(destinationImageData, 0, 0); 
+    c[08].putImageData(destinationImageData, 0, 0); 
+    c[09].putImageData(destinationImageData, 0, 0); 
+
+    drawLine(c[01], 0, width, Math.random() * height, Math.random() * height);
+    drawLine(c[02], Math.random() * width, Math.random() * width, 0, height);
+    drawLine(c[03], 0, width, Math.random() * height, Math.random() * height);
+    drawLine(c[04], Math.random() * width, Math.random() * width, 0, height);
+    drawLine(c[05], 0, width, Math.random() * height, Math.random() * height);
+    drawLine(c[06], Math.random() * width, Math.random() * width, 0, height);
+    drawLine(c[07], 0, width, Math.random() * height, Math.random() * height);
+    drawLine(c[08], Math.random() * width, Math.random() * width, 0, height);
+    drawLine(c[09], 0, width, Math.random() * height, Math.random() * height);
+
+    fitnessArray = new Array();
+    fitnessArray[01] = compareStuff(cOrigin, c[01]);
+    fitnessArray[02] = compareStuff(cOrigin, c[02]);
+    fitnessArray[03] = compareStuff(cOrigin, c[03]);
+    fitnessArray[04] = compareStuff(cOrigin, c[04]);
+    fitnessArray[05] = compareStuff(cOrigin, c[05]);
+    fitnessArray[06] = compareStuff(cOrigin, c[06]);
+    fitnessArray[07] = compareStuff(cOrigin, c[07]);
+    fitnessArray[08] = compareStuff(cOrigin, c[08]);
+    fitnessArray[09] = compareStuff(cOrigin, c[09]);
+
+    var index = 1;
+    var value = fitnessArray[index];
+    for (var i = index; i < fitnessArray.length; i++) {
+      if (fitnessArray[i] > value) {
+        value = fitnessArray[i];
+        index = i;
+      }
+    }
+    
+    // console.log("winner index: "+index);
+
+    var winnerImageData = c[index].getImageData(0, 0, width, height); 
+    cResult.putImageData(winnerImageData, 0, 0); 
+
+    p++;
+    console.log("iteration: "+p);
+
+  }
+  
+}
+
+
+
+function drawLine(cx, x1, x2, y1, y2) {
+    cx.beginPath();
+    cx.moveTo(x1, y1);
+    cx.lineTo(x2, y2);
+    cx.stroke();
+}
+
+function compareStuff(cx, cy){
+  
+    var fitness = 0;
+
+    var color1 = cx.getImageData(0, 0, width, height); 
+    var color2 = cy.getImageData(0, 0, width, height); 
+
+    for (var i = 0; i < color1.data.length; i=i+4) {
+
+        var deltaRed = color1.data[i] - color2.data[i];
+        var deltaGreen = color1.data[i+1] - color2.data[i+1];
+        var deltaBlue = color1.data[i+2] - color2.data[i+2];
+
+        var pixelFitness = deltaRed * deltaRed + deltaGreen * deltaGreen + deltaBlue * deltaBlue;
+
+
+        fitness = fitness + pixelFitness;
+    }
+
+    // console.log("fitness: "+fitness);
+    return fitness;
+}
+
+</script>
+
+</body>
+</html>

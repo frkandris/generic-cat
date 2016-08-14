@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="description" content="generikus cica">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Generic Cat</title>
+</head>
+
+<body>
+  <script src="https://code.jquery.com/jquery-3.0.0.js"></script>
+
+  <canvas id="myCanvasOrigin" height="200" width="200" style="border:1px solid #ccc;"></canvas>
+  <canvas id="myCanvasResult" height="200" width="200" style="border:1px solid #ccc;"></canvas>
+  <br/>
+
+  <a href="?imgSrc=fullcircle">fullcircle</a><br/>
+  <a href="?imgSrc=circle">circle</a><br/>
+  <a href="?imgSrc=halfcircle">halfcircle</a><br/>
+  <a href="?imgSrc=jesus">jesus</a><br/>
+  <a href="?imgSrc=arnold">arnold</a><br/>
+  
+  <div id="canvasHolder"></div>  
+
+<script>
+
+// reset variables
+
+var width = 200;
+var height = 200;
+
+var globalAlpha = 0.5;
+var strokeStyle = '#eeeeee';
+var lineWidth = 2;
+var globalCompositeOperation = "multiply"; // overlapping lines will darken each other
+
+var numberOfLines = 200;
+var numberOfNails = 2000; // imagine a circle, where the edge is made out of nails. 
+
+var numberOfChangedLines = 1; // how many line ending points will we change on every iteration
+var numberOfVariations = 4; // how many variations compete with each other at every iteration
+
+var maxIterations = 0; // set this to 0 to run infinitely
+
+
+// grab destination image
+
+var $_GET=[];
+window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi,function(a,name,value){$_GET[name]=value;});
+
+switch ($_GET['imgSrc']) {
+  case 'fullcircle':
+    var imgSrc = 'images/fullcircle.png'; 
+    break;
+  case 'circle':
+    var imgSrc = 'images/circle.png'; 
+    break;
+  case 'halfcircle':
+    var imgSrc = 'images/halfcircle.png'; 
+    break;
+  case 'jesus':
+    var imgSrc = 'images/jesus.png'; 
+    break;
+  case 'arnold':
+    var imgSrc = 'images/arnold.png'; 
+    break;
+  default:
+    var imgSrc = 'images/halfcircle.png';
+    break;
+}
+
+
+// init canvases
+
+cOrigin=document.getElementById("myCanvasOrigin").getContext("2d");
+cResult=document.getElementById("myCanvasResult").getContext("2d");
+
+
+for (q = 1; q<=numberOfVariations; q++) {
+  var htmlText = '  <canvas id="myCanvas'+q+'" height="200" width="200" style="display:inline-block;"></canvas>';
+  $("#canvasHolder").before(htmlText);
+}  
+
+c = new Array();
+for (q = 1; q<=numberOfVariations; q++) {
+  c[q]=document.getElementById("myCanvas"+q).getContext("2d");
+  c[q].globalAlpha=globalAlpha;
+  c[q].strokeStyle = strokeStyle;
+  c[q].globalCompositeOperation = globalCompositeOperation;
+  c[q].lineWidth = lineWidth;
+}  
+
+
+// generate baseline array with random numbers 1..numberOfNails
+
+lineEndingPointsBaseLineArray = new Array();
+for (i=1;i<=numberOfLines;i++) {
+  lineEndingPointsBaseLineArray.push(Math.floor((Math.random() * numberOfNails) + 1));
+}
+
+
+// generate empty variationsarrays
+lineEndingPointsVariationArray = new Array();
+for (q = 1; q<=numberOfVariations; q++) {
+  lineEndingPointsVariationArray[q] = new Array();
+}
+
+
+// generate the x,y coordinates of the nails of the circle
+
+circlePoints = new Array();
+for (var n=1; n<=numberOfNails; n++) {
+    x = Math.sin(2*n*Math.PI/numberOfNails)*width/2+width/2;
+    y = Math.cos(2*n*Math.PI/numberOfNails)*height/2+height/2;
+    circlePoints[n] = [x, y];
+    // cOrigin.fillRect(x, y, 2, 2);
+}
+
+
+// reset iterationcounter
+
+var p = 0;
+
+
+// load source image
+
+var img = new Image();
+img.src = imgSrc + '?' + new Date().getTime();
+// img.setAttribute('crossOrigin', '');
+img.onload = function () { 
+  cOrigin.drawImage(img, 0, 0); 
+
+  // start animation, draw first frame
+  window.requestAnimationFrame(iterateStuff);
+};
+
+
+
+function iterateStuff(){
+
+
+  console.log("iteration: "+p);
+
+  // clear all variation images
+
+  for (q = 1; q<=numberOfVariations; q++) {
+    c[q].clearRect(0, 0, width, height);
+  }
+
+
+  // copy baseline array to children arrays
+
+  for (q = 2; q<=numberOfVariations; q++) {
+    lineEndingPointsVariationArray[q] = lineEndingPointsBaseLineArray.slice();
+  }
+
+
+  // change some points in every child
+
+  for (q = 2; q<=numberOfVariations; q++) {
+
+    for (i=1;i<=numberOfChangedLines;i++) {
+      changedIndex = Math.floor((Math.random() * numberOfLines) + 1);
+      lineEndingPointsVariationArray[q][changedIndex] = Math.floor((Math.random() * numberOfNails) + 1);
+    }
+    // console.log(lineEndingPointsBaseLineArray);
+    // console.log(lineEndingPointsVariationArray[q]);
+  }
+
+
+  // draw the baseline
+
+  startX = circlePoints[lineEndingPointsBaseLineArray[1]][0];
+  startY = circlePoints[lineEndingPointsBaseLineArray[1]][1];
+
+  for (r = 2; r<=numberOfLines; r++) {
+    var lineIndex = lineEndingPointsBaseLineArray[r-1];
+    endX = circlePoints[lineIndex][0];
+    endY = circlePoints[lineIndex][1];
+    drawLine(c[1], startX, endX, startY, endY);
+    startX = endX;
+    startY = endY;
+  }
+
+
+  // draw the children
+
+  for (q = 2; q<=numberOfVariations; q++) {
+
+    startX = circlePoints[lineEndingPointsVariationArray[q][1]][0];
+    startY = circlePoints[lineEndingPointsVariationArray[q][1]][1];
+
+    for (r = 2; r<=numberOfLines; r++) {
+      var lineIndex = lineEndingPointsVariationArray[q][r-1];
+      endX = circlePoints[lineIndex][0];
+      endY = circlePoints[lineIndex][1];
+      drawLine(c[q], startX, endX, startY, endY);
+      startX = endX;
+      startY = endY;
+    }
+  }
+
+
+  // compare all children to the origin, store results in fitnessArray
+
+  fitnessArray = new Array();
+  for (q = 1; q<=numberOfVariations; q++) {
+    fitnessArray[q] = compareStuff(cOrigin, c[q]); 
+  }
+
+
+  // search fitnessArray for the largest number
+
+  var index = 1;
+  var value = fitnessArray[index];
+  for (var i = index; i < fitnessArray.length; i++) {
+    if (fitnessArray[i] > value) {
+      value = fitnessArray[i];
+      index = i;
+    }
+  }
+  console.log("winner index: "+index);
+  console.log("winner score: "+fitnessArray[index]);
+
+
+  // copy the winner to the baseline
+
+  if (index != 1) {
+    lineEndingPointsBaseLineArray = lineEndingPointsVariationArray[index].slice();
+  }
+
+  // copy the winner child to the baseline image
+
+  var winnerImageData = c[index].getImageData(0, 0, width, height); 
+  cResult.putImageData(winnerImageData, 0, 0); 
+
+
+  // next iteration
+
+  p++;
+  if (maxIterations!=0) {
+    if (p == maxIterations) {
+      console.log('done');
+      return;      
+    }
+  }
+  window.requestAnimationFrame(iterateStuff);
+
+}
+
+
+
+// draw a line to canvas cx, from x1;y1 to x2;y2
+
+function drawLine(cx, x1, x2, y1, y2) {
+    cx.beginPath();
+    cx.moveTo(x1, y1);
+    cx.lineTo(x2, y2);
+    cx.stroke();
+}
+
+
+// compare two canvases
+
+function compareStuff(cx, cy){
+  
+    var fitness = 0;
+    // var sumRed1 = 0;
+    // var sumRed2 = 0;
+
+    var color1 = cx.getImageData(0, 0, width, height); 
+    var color2 = cy.getImageData(0, 0, width, height); 
+
+    for (var i = 0; i < color1.data.length; i=i+4) {
+
+        var deltaRed = color1.data[i] - color2.data[i];
+        var deltaGreen = color1.data[i+1] - color2.data[i+1];
+        var deltaBlue = color1.data[i+2] - color2.data[i+2];
+
+        var pixelFitness = deltaRed * deltaRed + deltaGreen * deltaGreen + deltaBlue * deltaBlue;
+
+        // sumRed1 = sumRed1 + color1.data[i+2];
+        // sumRed2 = sumRed2 + color2.data[i+2];
+
+        fitness = fitness + pixelFitness;
+    }
+
+    // console.log("sumRed1: "+sumRed1);
+    // console.log("sumRed2: "+sumRed2);
+
+    // console.log("fitness: "+fitness);
+    return fitness;
+}
+
+</script>
+
+</body>
+</html>
