@@ -4,21 +4,21 @@ app.controller('myCtrl', function($scope) {
   // init
   $scope.image = "halfcircle";
   $scope.numberOfPoints = "200";
-  $scope.numberOfChangedLines = "1";
+  $scope.numberOfChangedPoints = "1";
   $scope.numberOfVariations = "5";
   $scope.lineWidth = 1;
-  generateCat($scope.image, $scope.numberOfPoints, $scope.numberOfChangedLines, $scope.numberOfVariations, $scope.lineWidth);
+  generateCat($scope.image, $scope.numberOfPoints, $scope.numberOfChangedPoints, $scope.numberOfVariations, $scope.lineWidth);
 
   // onChange
   $scope.onNgChange = function() {
-    generateCat($scope.image, $scope.numberOfPoints, $scope.numberOfChangedLines, $scope.numberOfVariations, $scope.lineWidth);
+    generateCat($scope.image, $scope.numberOfPoints, $scope.numberOfChangedPoints, $scope.numberOfVariations, $scope.lineWidth);
   };
 
 });
 
 
 
-function generateCat(image, numberOfPoints, numberOfChangedLines, numberOfVariations, lineWidth) {
+function generateCat(image, numberOfPoints, numberOfChangedPoints, numberOfVariations, lineWidth) {
 
 
   // load source image
@@ -85,7 +85,7 @@ function generateCat(image, numberOfPoints, numberOfChangedLines, numberOfVariat
 
     // var lineWidth = 1;
     // var numberOfPoints = 200; // the length of the continous line
-    // var numberOfChangedLines = 1; // how many line ending points will we change on every iteration
+    // var numberOfChangedPoints = 1; // how many line ending points will we change on every iteration
     // var numberOfVariations = 5; // how many variations compete with each other at every iteration
 
     var maxIterations = 0; // set this to 0 to run infinitely
@@ -133,7 +133,7 @@ function generateCat(image, numberOfPoints, numberOfChangedLines, numberOfVariat
 
     var p = 0; // reset iterationcounter
     window.requestAnimationFrame(function(timestamp) {
-      iterateStuff(p, numberOfPoints, numberOfVariations, numberOfChangedLines, width, height, maxIterations);
+      iterateStuff(p, numberOfPoints, numberOfVariations, numberOfChangedPoints, width, height, maxIterations);
     });
 
   }
@@ -141,7 +141,7 @@ function generateCat(image, numberOfPoints, numberOfChangedLines, numberOfVariat
 } // end of GenerateCat function
 
 
-function iterateStuff(p, numberOfPoints, numberOfVariations, numberOfChangedLines, width, height, maxIterations){
+function iterateStuff(p, numberOfPoints, numberOfVariations, numberOfChangedPoints, width, height, maxIterations){
 
   // console.log("iteration: "+p);
 
@@ -163,7 +163,7 @@ function iterateStuff(p, numberOfPoints, numberOfVariations, numberOfChangedLine
 
   for (q = 2; q<=numberOfVariations; q++) {
 
-    for (i=1;i<=numberOfChangedLines;i++) {
+    for (i=1;i<=numberOfChangedPoints;i++) {
       changedIndex = Math.floor((Math.random() * numberOfPoints));
 
       var x = Math.floor((Math.random() * width + 1));
@@ -254,7 +254,7 @@ function iterateStuff(p, numberOfPoints, numberOfVariations, numberOfChangedLine
   }
 
   window.requestAnimationFrame(function(timestamp) {
-    iterateStuff(p, numberOfPoints, numberOfVariations, numberOfChangedLines, width, height, maxIterations);
+    iterateStuff(p, numberOfPoints, numberOfVariations, numberOfChangedPoints, width, height, maxIterations);
   });
 
 } // end of iterateStuff function
