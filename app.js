@@ -64,12 +64,12 @@ function generateCat(image, numberOfPoints, numberOfChangedPoints, numberOfVaria
     cOriginCanvas = document.getElementById("myCanvasOrigin");
     cOriginCanvas.height = imageHeight;
     cOriginCanvas.width = imageWidth;
-    cOrigin=cOriginCanvas.getContext("2d");
+    cOrigin = cOriginCanvas.getContext("2d");
 
     cResultCanvas = document.getElementById("myCanvasResult");
     cResultCanvas.height = imageHeight;
     cResultCanvas.width = imageWidth;
-    cResult=cResultCanvas.getContext("2d");
+    cResult = cResultCanvas.getContext("2d");
 
     cOrigin.drawImage(img, 0, 0); 
 
@@ -88,7 +88,17 @@ function generateCat(image, numberOfPoints, numberOfChangedPoints, numberOfVaria
     // var numberOfChangedPoints = 1; // how many line ending points will we change on every iteration
     // var numberOfVariations = 5; // how many variations compete with each other at every iteration
 
-    var maxIterations = 0; // set this to 0 to run infinitely
+
+    // FIXME - this is the part where I was working
+
+    var genericMode = "incremental";
+
+    if (genericMode == "incremental") {
+      var currentMaxOfGenericIterations = 2;
+    } else {
+      var currentMaxOfGenericIterations = numberOfPoints;
+    }
+    var numberOfTries = 100;
 
 
     // inicialize canvases for calculation
@@ -101,8 +111,8 @@ function generateCat(image, numberOfPoints, numberOfChangedPoints, numberOfVaria
 
     c = new Array();
     for (q = 1; q<=numberOfVariations; q++) {
-      c[q]=document.getElementById("myCanvas"+q).getContext("2d");
-      c[q].globalAlpha=globalAlpha;
+      c[q] = document.getElementById("myCanvas"+q).getContext("2d");
+      c[q].globalAlpha = globalAlpha;
       c[q].strokeStyle = strokeStyle;
       c[q].globalCompositeOperation = globalCompositeOperation;
       c[q].lineWidth = lineWidth;
@@ -132,8 +142,9 @@ function generateCat(image, numberOfPoints, numberOfChangedPoints, numberOfVaria
     // start animation, draw first frame
 
     var p = 0; // reset iterationcounter
+
     window.requestAnimationFrame(function(timestamp) {
-      iterateStuff(p, numberOfPoints, numberOfVariations, numberOfChangedPoints, width, height, maxIterations);
+      iterateStuff(p, numberOfPoints, numberOfVariations, numberOfChangedPoints, width, height, currentMaxOfGenericIterations, numberOfTries);
     });
 
   }
@@ -141,7 +152,7 @@ function generateCat(image, numberOfPoints, numberOfChangedPoints, numberOfVaria
 } // end of GenerateCat function
 
 
-function iterateStuff(p, numberOfPoints, numberOfVariations, numberOfChangedPoints, width, height, maxIterations){
+function iterateStuff(p, numberOfPoints, numberOfVariations, numberOfChangedPoints, width, height, currentMaxOfGenericIterations, numberOfTries){
 
   // console.log("iteration: "+p);
 
@@ -164,7 +175,7 @@ function iterateStuff(p, numberOfPoints, numberOfVariations, numberOfChangedPoin
   for (q = 2; q<=numberOfVariations; q++) {
 
     for (i=1;i<=numberOfChangedPoints;i++) {
-      changedIndex = Math.floor((Math.random() * numberOfPoints));
+      changedIndex = Math.floor((Math.random() * currentMaxOfGenericIterations));
 
       var x = Math.floor((Math.random() * width + 1));
       var y = Math.floor((Math.random() * height + 1));
@@ -182,7 +193,7 @@ function iterateStuff(p, numberOfPoints, numberOfVariations, numberOfChangedPoin
   startX = lineEndingPointsBaseLineArray[0][0];
   startY = lineEndingPointsBaseLineArray[0][1];
 
-  for (r = 0; r<numberOfPoints; r++) {
+  for (r = 0; r<currentMaxOfGenericIterations; r++) {
     endX = lineEndingPointsBaseLineArray[r][0];
     endY = lineEndingPointsBaseLineArray[r][1];
     drawLine(c[1], startX, endX, startY, endY);
@@ -198,7 +209,7 @@ function iterateStuff(p, numberOfPoints, numberOfVariations, numberOfChangedPoin
     startX = lineEndingPointsVariationArray[q][0][0];
     startY = lineEndingPointsVariationArray[q][0][1];
 
-    for (r = 0; r<numberOfPoints; r++) {
+    for (r = 0; r<currentMaxOfGenericIterations; r++) {
       endX = lineEndingPointsVariationArray[q][r][0];
       endY = lineEndingPointsVariationArray[q][r][1];
       drawLine(c[q], startX, endX, startY, endY);
@@ -246,15 +257,14 @@ function iterateStuff(p, numberOfPoints, numberOfVariations, numberOfChangedPoin
   // next iteration
 
   p++;
-  if (maxIterations!=0) {
-    if (p == maxIterations) {
-      console.log('done');
-      return;      
-    }
+  if (p>numberOfTries) {
+    p = 0;
+    currentMaxOfGenericIterations++;
+    console.log("currentMaxOfGenericIterations increased to "+currentMaxOfGenericIterations);
   }
 
   window.requestAnimationFrame(function(timestamp) {
-    iterateStuff(p, numberOfPoints, numberOfVariations, numberOfChangedPoints, width, height, maxIterations);
+    iterateStuff(p, numberOfPoints, numberOfVariations, numberOfChangedPoints, width, height, currentMaxOfGenericIterations, numberOfTries);
   });
 
 } // end of iterateStuff function
